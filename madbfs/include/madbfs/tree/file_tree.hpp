@@ -81,7 +81,6 @@ namespace madbfs::tree
             return {
                 .connection = m_connection,
                 .cache      = m_cache,
-                .fd_counter = m_fd_counter,
                 .path       = path,
             };
         }
@@ -89,7 +88,6 @@ namespace madbfs::tree
         Node                    m_root;
         connection::Connection& m_connection;
         data::Cache&            m_cache;
-        std::atomic<u64>        m_fd_counter       = 0;
         bool                    m_root_initialized = false;
     };
 }

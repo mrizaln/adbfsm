@@ -46,6 +46,8 @@ namespace madbfs::connection
          * @brief Get the real file pointed by a symlink.
          *
          * @param path The path to the file or directory.
+         *
+         * @return Target of the link.
          */
         virtual AExpect<path::PathBuf> readlink(path::Path path) = 0;
 
@@ -100,11 +102,30 @@ namespace madbfs::connection
         virtual AExpect<void> truncate(path::Path path, off_t size) = 0;
 
         /**
+         * @brief Open a file on the device.
+         *
+         * @param path Path to the file on the device.
+         * @param flags Open flags.
+         *
+         * @return File descriptor.
+         */
+        virtual AExpect<u64> open(path::Path path, int flags) = 0;
+
+        /**
+         * @brief Close a file on the device.
+         *
+         * @param fd File descriptor to the file.
+         */
+        virtual AExpect<void> close(u64 fd) = 0;
+
+        /**
          * @brief Read from a file on the device.
          *
          * @param path Path to the file on the device.
          * @param out Buffer to read into.
          * @param offset Offset to read from.
+         *
+         * @return Number of bytes read.
          */
         virtual AExpect<usize> read(path::Path path, Span<char> out, off_t offset) = 0;
 
@@ -114,6 +135,8 @@ namespace madbfs::connection
          * @param path Path to the file on the device.
          * @param in Buffer to write from.
          * @param offset Offset to write to.
+         *
+         * @return Number of bytes written.
          */
         virtual AExpect<usize> write(path::Path path, Span<const char> in, off_t offset) = 0;
 
@@ -134,6 +157,8 @@ namespace madbfs::connection
          * @param out Output file path.
          * @param out_off Output offset.
          * @param size Number of bytes to be copied.
+         *
+         * @return Number of bytes copied.
          */
         virtual AExpect<usize> copy_file_range(
             path::Path in,

@@ -365,11 +365,11 @@ namespace madbfs::tree
         }
         auto& file = may_file->get();
 
-        auto fd  = context.fd_counter.fetch_add(1, std::memory_order::relaxed) + 1;
-        auto res = file.open(fd, flags);
-        assert(res);
-
-        co_return fd;
+        co_return (co_await context.connection.open(context.path, flags)).transform([&](u64 fd) {
+            auto res = file.open(fd);
+            assert(res);
+            return fd;
+        });
     }
 
     AExpect<usize> Node::read(Context context, u64 fd, Span<char> out, off_t offset)
@@ -449,7 +449,13 @@ namespace madbfs::tree
         }
         file.set_dirty(false);
         auto filesize = static_cast<usize>(stat()->get().size);
-        co_return co_await context.cache.flush(id(), filesize);
+
+        auto res = co_await context.cache.flush(id(), filesize);
+        if (not res) {
+            co_return Unexpect{ res.error() };
+        }
+
+        co_return context.connection.close(fd);
     }
 
     AExpect<void> Node::utimens(Context context, timespec atime, timespec mtime)

@@ -28,12 +28,6 @@ namespace madbfs::tree
     public:
         friend Node;
 
-        struct Entry
-        {
-            u64 fd;
-            i32 flags;
-        };
-
         RegularFile() = default;
 
         RegularFile(RegularFile&& other)
@@ -50,12 +44,12 @@ namespace madbfs::tree
          *
          * @return True if the fd has not been inserted before, false otherwise.
          */
-        bool open(u64 fd, int flags)
+        bool open(u64 fd)
         {
             if (is_open(fd)) {
                 return false;
             }
-            m_open_fds.emplace_back(fd, flags);
+            m_open_fds.emplace_back(fd);
             return true;
         }
 
@@ -66,18 +60,15 @@ namespace madbfs::tree
          *
          * @return True if `fd` actually removed, false otherwise.
          */
-        bool close(u64 fd)
-        {
-            return std::erase_if(m_open_fds, [&](const Entry& e) { return e.fd == fd; }) > 0;
-        }
+        bool close(u64 fd) { return std::erase(m_open_fds, fd) > 0; }
 
-        bool is_open(u64 fd) { return sr::find(m_open_fds, fd, &Entry::fd) != m_open_fds.end(); }
+        bool is_open(u64 fd) { return sr::find(m_open_fds, fd) != m_open_fds.end(); }
         bool has_open_fds() const { return not m_open_fds.empty(); }
         bool is_dirty() const { return m_dirty.load(std::memory_order::acquire); }
         void set_dirty(bool val) { m_dirty.store(val, std::memory_order::release); }
 
     private:
-        Vec<Entry>        m_open_fds;    // used to track open files
+        Vec<u64>          m_open_fds;    // used to track open files
         std::atomic<bool> m_dirty = false;
     };
 
@@ -200,7 +191,6 @@ namespace madbfs::tree
         {
             connection::Connection& connection;
             data::Cache&            cache;
-            std::atomic<u64>&       fd_counter;
             const path::Path&       path;    // path for connection
         };
 
