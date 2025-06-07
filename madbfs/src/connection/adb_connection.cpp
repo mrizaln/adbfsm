@@ -174,6 +174,20 @@ namespace madbfs::connection
         }
     }
 
+    AExpect<u64> AdbConnection::open(path::Path path, int flags)
+    {
+        // using adb shell commands, you don't need to open file first to operate on it
+
+        co_return m_fd_counter.fetch_add(1, std::memory_order::relaxed) + 1;
+    }
+
+    AExpect<void> AdbConnection::close(u64 fd)
+    {
+        // do nothing
+
+        co_return Expect<void>{};
+    }
+
     AExpect<void> AdbConnection::truncate(path::Path path, off_t size)
     {
         const auto qpath = quoted(path);

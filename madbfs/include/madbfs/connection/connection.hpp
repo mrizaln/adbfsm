@@ -94,14 +94,6 @@ namespace madbfs::connection
         // ---------------
 
         /**
-         * @brief Truncate a file on the device.
-         *
-         * @param path Path to the file on the device.
-         * @param size Size to truncate to.
-         */
-        virtual AExpect<void> truncate(path::Path path, off_t size) = 0;
-
-        /**
          * @brief Open a file on the device.
          *
          * @param path Path to the file on the device.
@@ -117,6 +109,14 @@ namespace madbfs::connection
          * @param fd File descriptor to the file.
          */
         virtual AExpect<void> close(u64 fd) = 0;
+
+        /**
+         * @brief Truncate a file on the device.
+         *
+         * @param path Path to the file on the device.
+         * @param size Size to truncate to.
+         */
+        virtual AExpect<void> truncate(path::Path path, off_t size) = 0;
 
         /**
          * @brief Read from a file on the device.
